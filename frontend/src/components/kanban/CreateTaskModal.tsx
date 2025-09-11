@@ -11,7 +11,7 @@ import { useAppSelector } from '@/store/hooks';
 interface CreateTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'status'>) => void;
+  onCreate: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => void;
   orgId: string;
 }
 
@@ -84,9 +84,10 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     try {
       const taskTags = tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
       
-      const newTask: Omit<Task, 'id' | 'createdAt' | 'updatedAt'| 'status'> = {
+      const newTask: Omit<Task, 'id' | 'createdAt' | 'updatedAt'> = {
         title: title.trim(),
         description: description.trim() || undefined,
+        status: TaskStatus.TODO, // Default status for new tasks
         assigneeId: assigneeId || undefined,
         assignee: assigneeId ? members.find(m => m.id === assigneeId) : undefined,
         dueDate: dueDate || undefined,

@@ -1,7 +1,7 @@
 /// <reference path="../types/express/index.d.ts" />
 import { Router } from 'express';
 
-import { createOrganization, listOrganizations, updateOrganization, deleteOrganization, inviteUserToOrganization, listOrganizationMembers, updateMemberRole } from '../controllers/orgController';
+import { createOrganization, listOrganizations, updateOrganization, deleteOrganization, inviteUserToOrganization, listOrganizationMembers, updateMemberRole, removeMemberFromOrganization } from '../controllers/orgController';
 import { authenticate } from '../middlewares/authMiddleware';
 import { requireRole } from '../middlewares/roleMiddleware';
 
@@ -20,5 +20,7 @@ router.post('/:orgId/invite', authenticate, requireRole('ADMIN'), inviteUserToOr
 router.get('/:orgId/members', authenticate, listOrganizationMembers);
 
 router.put('/:orgId/members/:userId', authenticate, requireRole('ADMIN'), updateMemberRole);
+
+router.delete('/:orgId/members/:userId', authenticate, requireRole('ADMIN'), removeMemberFromOrganization);
 
 export default router;

@@ -41,6 +41,7 @@ export default function DashboardPage() {
           const allTasks: Task[] = [];
           for (const project of orgProjects.slice(0, 3)) { 
             try {
+              console.log('Current token:', localStorage.getItem('token'));
               const projectTasks = await taskAPI.list(orgs[0].id, project.id);
               allTasks.push(...projectTasks);
             } catch (error) {

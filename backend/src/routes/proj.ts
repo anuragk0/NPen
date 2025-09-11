@@ -4,17 +4,16 @@ import { createProject, listProjects, getProjectById, updateProject, deleteProje
 import { requireRole } from "../middlewares/roleMiddleware";
 import { authenticate } from "../middlewares/authMiddleware";
 
-
 const router = Router({ mergeParams: true });
 
 router.post('/', authenticate, requireRole('MEMBER'), createProject);
 
-router.get('/', authenticate, requireRole('GUEST'), listProjects);
+router.get('/', authenticate, requireRole('MEMBER'), listProjects);
 
-router.get('/:projectId', authenticate, requireRole('GUEST'), getProjectById);
+router.get('/:projectId', authenticate, requireRole('MEMBER'), getProjectById);
 
 router.put('/:projectId', authenticate, requireRole('MEMBER'), updateProject);
 
 router.delete('/:projectId', authenticate, requireRole('ADMIN'), deleteProject);
 
-export default router;
+export default router; 

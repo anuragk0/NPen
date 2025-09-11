@@ -23,8 +23,10 @@ import {
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
-import { organizationAPI } from '@/lib/api';
-import { useAppSelector } from '@/store/hooks';
+import { organizationAPI, messagingAPI } from '@/lib/api';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import { startConversationAsync, setActiveConversationId } from '@/store/slices/messagesSlice';
+import { useRouter } from 'next/navigation';
 
 interface OrganizationWithMembers {
   organization: Organization;
@@ -119,11 +121,14 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({ isOpen, onClose, 
 
 export default function TeamPage() {
   const { user: currentUser } = useAppSelector(state => state.auth);
+  const dispatch = useAppDispatch();
+  const router = useRouter();
   const [organizations, setOrganizations] = useState<OrganizationWithMembers[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [openMemberMenuId, setOpenMemberMenuId] = useState<string | null>(null);
 
   const loadOrganizationsWithMembers = async () => {
     try {
@@ -200,9 +205,34 @@ export default function TeamPage() {
     }
   };
 
+  const handleRemoveMember = async (orgId: string, userId: string) => {
+    try {
+      await organizationAPI.removeMember(orgId, userId);
+      toast.success('Member removed successfully!');
+      await loadOrganizationsWithMembers();
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.error || 'Failed to remove member';
+      toast.error(errorMessage);
+    }
+  };
+
   const openInviteModal = (org: Organization) => {
     setSelectedOrganization(org);
     setIsInviteModalOpen(true);
+  };
+
+  const handleStartConversation = async (orgId: string, userId: string) => {
+    try {
+      const conversation = await dispatch(startConversationAsync({ 
+        orgId, 
+        participantIds: [userId] 
+      })).unwrap();
+ 
+      dispatch(setActiveConversationId(conversation.id));
+      router.push('/messages');
+    } catch (error: any) {
+      toast.error(error || 'Failed to start conversation');
+    }
   };
 
   const getRoleIcon = (role: Role) => {
@@ -358,6 +388,7 @@ export default function TeamPage() {
                             <button 
                               className="flex items-center justify-center w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors duration-200"
                               title="Send message"
+                              onClick={() => handleStartConversation(orgData.organization.id, membership.userId)}
                             >
                               <MessageSquare className="h-4 w-4 text-gray-600" />
                             </button>
@@ -370,19 +401,39 @@ export default function TeamPage() {
                         )}
 
                         {orgData.currentUserRole === Role.ADMIN && membership.role !== Role.ADMIN && membership.user && (
-                          <div className="flex space-x-2">
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              className="flex-1 text-xs"
-                              onClick={() => handleUpdateMemberRole(orgData.organization.id, membership.userId, Role.ADMIN)}
-                            >
-                              <Crown className="h-3 w-3 mr-1" />
-                              Make Admin
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Settings className="h-3 w-3" />
-                            </Button>
+                          <div className="relative">
+                            <div className="flex space-x-2">
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                className="flex-1 text-xs"
+                                onClick={() => handleUpdateMemberRole(orgData.organization.id, membership.userId, Role.ADMIN)}
+                              >
+                                <Crown className="h-3 w-3 mr-1" />
+                                Make Admin
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setOpenMemberMenuId(openMemberMenuId === membership.id ? null : membership.id)}
+                                title="Member settings"
+                              >
+                                <Settings className="h-3 w-3" />
+                              </Button>
+                            </div>
+                            {openMemberMenuId === membership.id && (
+                              <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                                <button
+                                  className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md"
+                                  onClick={() => {
+                                    setOpenMemberMenuId(null);
+                                    handleRemoveMember(orgData.organization.id, membership.userId);
+                                  }}
+                                >
+                                  Remove member
+                                </button>
+                              </div>
+                            )}
                           </div>
                         )}
                       </Card>

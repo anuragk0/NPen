@@ -8,6 +8,7 @@ export const createOrganization = async (req: Request, res: Response) => {
   try {
     const { name } = req.body;
     const userId = req.user?.id;
+    console.log(0);
     if (!name) return res.status(400).json({ error: 'Organization name is required' });
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
     const org = await prisma.organization.create({
@@ -159,6 +160,54 @@ export const updateMemberRole = async (req: Request, res: Response) => {
     const error = err instanceof Error ? err : new Error('Unknown error');
     console.error('Error updating member role:', error);
     res.status(500).json({ error: 'Failed to update member role', details: error.message });
+  }
+};
+
+export const removeMemberFromOrganization = async (req: Request, res: Response) => {
+  try {
+    const { orgId, userId } = req.params;
+    const currentUserId = req.user?.id;
+
+    if (!orgId || !userId) {
+      return res.status(400).json({ error: 'Organization ID and User ID are required' });
+    }
+
+  
+    const currentUserMembership = await prisma.membership.findUnique({
+      where: { userId_organizationId: { userId: currentUserId as string, organizationId: orgId } },
+    });
+
+    if (!currentUserMembership || currentUserMembership.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Only admins can remove members' });
+    }
+
+
+    const targetMembership = await prisma.membership.findUnique({
+      where: { userId_organizationId: { userId, organizationId: orgId } },
+    });
+
+    if (!targetMembership) {
+      return res.status(404).json({ error: 'Membership not found' });
+    }
+
+    if (targetMembership.role === 'ADMIN') {
+      const adminCount = await prisma.membership.count({
+        where: { organizationId: orgId, role: 'ADMIN' },
+      });
+      if (adminCount <= 1) {
+        return res.status(400).json({ error: 'Cannot remove the last admin of the organization' });
+      }
+    }
+
+    await prisma.membership.delete({
+      where: { userId_organizationId: { userId, organizationId: orgId } },
+    });
+
+    return res.status(200).json({ message: 'Member removed successfully' });
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error('Unknown error');
+    console.error('Error removing member:', error);
+    return res.status(500).json({ error: 'Failed to remove member', details: error.message });
   }
 };
 

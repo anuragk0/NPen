@@ -13,7 +13,7 @@ import {
   UpdateTaskData,
   User,
   Role,
-  Membership,
+  Membership
 } from '@/types';
 
 
@@ -80,6 +80,7 @@ export const authAPI = {
   },
 };
 
+
 // Organization API
 export const organizationAPI = {
   create: async (data: CreateOrganizationData): Promise<Organization> => {
@@ -112,6 +113,28 @@ export const organizationAPI = {
 
   updateMemberRole: async (orgId: string, userId: string, role: Role): Promise<void> => {
     await api.put(`/orgs/${orgId}/members/${userId}`, { role });
+  },
+  removeMember: async (orgId: string, userId: string): Promise<void> => {
+    await api.delete(`/orgs/${orgId}/members/${userId}`);
+  },
+};
+
+export const messagingAPI = {
+  listConversations: async (orgId: string) => {
+    const res = await api.get(`/orgs/${orgId}/messages/conversations`);
+    return res.data;
+  },
+  startConversation: async (orgId: string, participantIds: string[]) => {
+    const res = await api.post(`/orgs/${orgId}/messages/conversations`, { participantIds });
+    return res.data;
+  },
+  listMessages: async (orgId: string, conversationId: string) => {
+    const res = await api.get(`/orgs/${orgId}/messages/conversations/${conversationId}/messages`);
+    return res.data;
+  },
+  sendMessage: async (orgId: string, conversationId: string, content: string) => {
+    const res = await api.post(`/orgs/${orgId}/messages/conversations/${conversationId}/messages`, { content });
+    return res.data;
   },
 };
 

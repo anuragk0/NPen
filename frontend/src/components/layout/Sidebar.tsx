@@ -26,6 +26,7 @@ const Sidebar: React.FC = () => {
     { name: 'Organizations', href: '/organizations', icon: Building2 },
     { name: 'Projects', href: '/projects', icon: FolderOpen },
     { name: 'Tasks', href: '/tasks', icon: CheckSquare },
+    { name: 'Messages', href: '/messages', icon: Users },
     { name: 'Team', href: '/team', icon: Users },
     { name: 'Settings', href: '/settings', icon: Settings },
   ];

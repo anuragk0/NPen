@@ -4,6 +4,13 @@ import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
 
+prisma.$connect()
+  .then(() => console.log('Database connected successfully'))
+  .catch((err) => {
+    console.error('Database connection failed:', err);
+    throw new Error('Database connection failed');
+  });
+
 export async function registerUser(data: { email: string; password: string; name: string }) {
   const { email, password, name } = data;
 

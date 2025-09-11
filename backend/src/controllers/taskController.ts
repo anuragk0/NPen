@@ -1,3 +1,4 @@
+/// <reference path="../types/express/index.d.ts" />
 import { Request, Response } from "express";
 import { PrismaClient } from '@prisma/client';
 
@@ -82,8 +83,9 @@ export const listTasks = async (req: Request, res: Response) => {
         if (!projectId) {
             return res.status(400).json("Project ID is required");
         }
+        
 
-        const project = await prisma.project.findFirst({
+        const project = await prisma.project.findMany({
             where: {
                 id: projectId,
                 organizationId: orgId
@@ -93,6 +95,7 @@ export const listTasks = async (req: Request, res: Response) => {
         if (!project) {
             return res.status(404).json("Project not found");
         }
+        
 
         const tasks = await prisma.task.findMany({
             where: { projectId },
@@ -406,3 +409,4 @@ export const getKanbanBoard = async (req: Request, res: Response) => {
         res.status(500).json("Internal server error");
     }
 };
+ 

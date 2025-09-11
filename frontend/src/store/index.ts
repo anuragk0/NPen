@@ -3,6 +3,7 @@ import authReducer from './slices/authSlice';
 import organizationsReducer from './slices/organizationsSlice';
 import projectsReducer from './slices/projectsSlice';
 import tasksReducer from './slices/tasksSlice';
+import messagesReducer from './slices/messagesSlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     organizations: organizationsReducer,
     projects: projectsReducer,
     tasks: tasksReducer,
+    messages: messagesReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

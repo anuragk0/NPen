@@ -7,6 +7,7 @@ export const createProject = async (req: Request, res: Response) => {
     try {
         const { orgId } = req.params; 
         const { name, description } = req.body;
+        console.log(0)
 
         if (!name) {
             return res.status(400).json("Project name is required");

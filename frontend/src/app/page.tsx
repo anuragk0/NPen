@@ -8,14 +8,14 @@ import Link from 'next/link';
 import Button from '@/components/ui/Button';
 
 export default function HomePage() {
-  const { isAuthenticated } = useAppSelector(state => state.auth);
+  const { isAuthenticated, isInitialized } = useAppSelector(state => state.auth);
   const router = useRouter();
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isInitialized && isAuthenticated) {
       router.push('/dashboard');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isInitialized, router]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100">

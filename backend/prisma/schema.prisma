@@ -14,6 +14,8 @@ model User {
   passwordHash   String
   memberships    Membership[]
   tasksAssigned  Task[]    @relation("TaskAssignee")
+  conversationParticipations ConversationParticipant[]
+  messagesSent   Message[]
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
@@ -25,6 +27,7 @@ model Organization {
   name         String
   memberships  Membership[]
   projects     Project[]
+  conversations Conversation[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
@@ -86,4 +89,42 @@ enum TaskStatus {
   IN_PROGRESS
   DONE
   BLOCKED
+}
+
+model Conversation {
+  id             String                     @id @default(uuid())
+  organization   Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  organizationId String
+  participants   ConversationParticipant[]
+  messages       Message[]
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
+
+  @@map("Conversation")
+}
+
+model ConversationParticipant {
+  id              String       @id @default(uuid())
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  conversationId  String
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId          String
+  lastReadAt      DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@unique([conversationId, userId])
+  @@map("ConversationParticipant")
+}
+
+model Message {
+  id             String        @id @default(uuid())
+  conversation   Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  conversationId String
+  sender         User          @relation(fields: [senderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  senderId       String
+  content        String
+  createdAt      DateTime      @default(now())
+
+  @@map("Message")
 }
