@@ -7,7 +7,6 @@ import taskRoutes from './routes/task';
 import messageRoutes from './routes/message';
 
 const app = express();
-app.use(express.json());
 
 app.use(cors({
   origin: 'https://jocular-donut-c0ff86.netlify.app',
@@ -15,6 +14,8 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }))
+
+app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/orgs', orgRoutes);
