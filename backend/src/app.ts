@@ -5,7 +5,6 @@ import orgRoutes from './routes/org';
 import projectRoutes from './routes/proj';
 import taskRoutes from './routes/task';
 import messageRoutes from './routes/message';
-import { validateOrganizationMembership } from './middlewares/orgMiddleware';
 
 const app = express();
 
